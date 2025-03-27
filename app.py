@@ -4,6 +4,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
+from uploader import load_documents_from_upload, build_vectorstore
 from dotenv import load_dotenv
 import os
 
@@ -15,6 +16,18 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 st.set_page_config(page_title="Geode Assistant", layout="wide")
 st.title("🧠 Geode: Streetworks Assistant")
 st.sidebar.markdown("Ask a question based on your internal docs or streetworks guidance.")
+st.sidebar.markdown("### 📤 Upload and Reindex")
+uploaded_files = st.sidebar.file_uploader("Upload files", type=["pdf", "xlsx"], accept_multiple_files=True)
+
+if st.sidebar.button("Reindex Documents"):
+    if uploaded_files:
+        with st.spinner("Building vector index..."):
+            docs = load_documents_from_upload(uploaded_files)
+            build_vectorstore(docs, openai_api_key)
+        st.sidebar.success("✅ Reindex complete. You can now ask questions.")
+    else:
+        st.sidebar.warning("⚠️ Please upload at least one PDF or Excel file.")
+
 
 if "history" not in st.session_state:
     st.session_state.history = []
