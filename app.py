@@ -1,7 +1,6 @@
 import streamlit as st
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
-from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from uploader import load_documents_from_upload, build_vectorstore
@@ -28,7 +27,6 @@ if st.sidebar.button("Reindex Documents"):
     else:
         st.sidebar.warning("⚠️ Please upload at least one PDF or Excel file.")
 
-
 if "history" not in st.session_state:
     st.session_state.history = []
 
@@ -36,6 +34,12 @@ if "history" not in st.session_state:
 @st.cache_resource
 def get_qa():
     embedder = OpenAIEmbeddings(api_key=openai_api_key)
+
+    index_path = "vector_index/index.faiss"
+    if not os.path.exists(index_path):
+        st.warning("No vector index found. Please upload documents and click 'Reindex Documents' in the sidebar.")
+        return None
+
     vectorstore = FAISS.load_local("vector_index", embedder, allow_dangerous_deserialization=True)
     retriever = vectorstore.as_retriever(search_type="similarity", k=5)
 
@@ -71,10 +75,13 @@ qa = get_qa()
 question = st.text_input("Ask Geode something...", placeholder="e.g. What are the FPN charges?")
 
 if question:
-    result = qa({"query": question})
-    answer = result["result"]
-    sources = result.get("source_documents", [])
-    st.session_state.history.append((question, answer, sources))
+    if qa:
+        result = qa({"query": question})
+        answer = result["result"]
+        sources = result.get("source_documents", [])
+        st.session_state.history.append((question, answer, sources))
+    else:
+        st.error("❌ No index available. Please upload documents and reindex first.")
 
 # Display chat history
 for q, a, sources in reversed(st.session_state.history):
