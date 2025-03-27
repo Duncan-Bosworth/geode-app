@@ -1,9 +1,13 @@
-streamlit
+# For PDF parsing
+pypdf
+pdfplumber
+
+# For Excel parsing
+openpyxl
+
+# Core
 langchain
 langchain-community
 langchain-openai
-openai
-faiss-cpu
+streamlit
 python-dotenv
-tiktoken
-pandas
