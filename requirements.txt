@@ -4,6 +4,8 @@ pdfplumber
 
 # For Excel parsing
 openpyxl
+unstructured
+
 
 # Core
 langchain
