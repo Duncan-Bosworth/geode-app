@@ -1,6 +1,6 @@
 import streamlit as st
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
@@ -22,7 +22,7 @@ if "history" not in st.session_state:
 # Build the QA chain
 @st.cache_resource
 def get_qa():
-    embedder = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    embedder = OpenAIEmbeddings(api_key=openai_api_key)
     vectorstore = FAISS.load_local("vector_index", embedder, allow_dangerous_deserialization=True)
     retriever = vectorstore.as_retriever(search_type="similarity", k=5)
 
